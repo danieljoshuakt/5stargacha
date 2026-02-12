@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lucky Gacha</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    color: white;
+    text-align: center;
+}
+
+header {
+    background: #ff4081;
+    padding: 15px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.balance {
+    margin: 15px;
+    font-size: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background: #ff4081;
+    color: white;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #ff79a8;
+}
+
+.card {
+    display: inline-block;
+    margin: 10px;
+    padding: 20px;
+    border-radius: 10px;
+    width: 120px;
+    font-weight: bold;
+}
+
+.common { background: gray; }
+.rare { background: #2196f3; }
+.epic { background: #9c27b0; }
+.legendary { background: gold; color: black; }
+
+.result-area {
+    margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<header>🎁 Lucky Gacha 🎁</header>
+
+<div class="balance">
+Balance: $<span id="balance">1000</span>
+</div>
+
+<button onclick="pull(1)">Pull x1 ($100)</button>
+<button onclick="pull(10)">Pull x10 ($900)</button>
+
+<div class="result-area" id="results"></div>
+
+<script>
+
+// ===== SAFE BALANCE SYSTEM =====
+let balance = parseInt(localStorage.getItem("gachaBalance")) || 1000;
+
+function updateBalance() {
+    document.getElementById("balance").textContent = balance;
+    localStorage.setItem("gachaBalance", balance);
+}
+
+updateBalance();
+
+// ===== CHARACTER DATA =====
+const characters = [
+    {name: "Slime", rarity: "common", chance: 50},
+    {name: "Knight", rarity: "rare", chance: 30},
+    {name: "Dragon", rarity: "epic", chance: 15},
+    {name: "Phoenix", rarity: "legendary", chance: 5}
+];
+
+// ===== RANDOM SYSTEM (FIXED) =====
+function getRandomCharacter() {
+    let rand = Math.random() * 100;
+    let cumulative = 0;
+
+    for (let i = 0; i < characters.length; i++) {
+        cumulative += characters[i].chance;
+        if (rand <= cumulative) {
+            return characters[i];
+        }
+    }
+
+    // fallback (prevents undefined)
+    return characters[0];
+}
+
+// ===== PULL FUNCTION (FIXED) =====
+function pull(amount) {
+
+    let cost = amount === 10 ? 900 : 100;
+
+    if (balance < cost) {
+        alert("Not enough balance!");
+        return;
+    }
+
+    balance -= cost;
+    updateBalance();
+
+    const resultsDiv = document.getElementById("results");
+    resultsDiv.innerHTML = "";
+
+    for (let i = 0; i < amount; i++) {
+
+        let char = getRandomCharacter();
+
+        let card = document.createElement("div");
+        card.className = "card " + char.rarity;
+
+        card.innerHTML = `
+            <div>${char.name}</div>
+            <div>⭐ ${char.rarity.toUpperCase()}</div>
+        `;
+
+        resultsDiv.appendChild(card);
+    }
+}
+
+</script>
+
+</body>
+</html>
